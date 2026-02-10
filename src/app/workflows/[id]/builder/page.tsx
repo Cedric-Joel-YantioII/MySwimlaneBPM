@@ -89,7 +89,7 @@ function StartEventNode({ data }: { data: Record<string, unknown> }) {
         <circle cx={EVENT_SIZE/2} cy={EVENT_SIZE/2} r={EVENT_SIZE/2-2} fill={STATUS_BG[s]} stroke={STATUS_COLOR[s]} strokeWidth="2"/>
         <polygon points={`${EVENT_SIZE*0.38},${EVENT_SIZE*0.28} ${EVENT_SIZE*0.38},${EVENT_SIZE*0.72} ${EVENT_SIZE*0.72},${EVENT_SIZE*0.5}`} fill={STATUS_COLOR[s]} opacity="0.6"/>
       </svg>
-      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</span>
+      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
       <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
       <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
     </div>
@@ -106,7 +106,7 @@ function EndEventNode({ data }: { data: Record<string, unknown> }) {
         <circle cx={EVENT_SIZE/2} cy={EVENT_SIZE/2} r={EVENT_SIZE/2-2} fill={STATUS_BG[s]} stroke={STATUS_COLOR[s]} strokeWidth="4"/>
         <rect x={EVENT_SIZE*0.32} y={EVENT_SIZE*0.32} width={EVENT_SIZE*0.36} height={EVENT_SIZE*0.36} rx="2" fill={STATUS_COLOR[s]} opacity="0.7"/>
       </svg>
-      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</span>
+      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
     </div>
   );
 }
@@ -121,7 +121,7 @@ function IntermediateEventNode({ data }: { data: Record<string, unknown> }) {
         <circle cx={EVENT_SIZE/2} cy={EVENT_SIZE/2} r={EVENT_SIZE/2-2} fill={STATUS_BG[s]} stroke={STATUS_COLOR[s]} strokeWidth="2"/>
         <circle cx={EVENT_SIZE/2} cy={EVENT_SIZE/2} r={EVENT_SIZE/2-6} fill="none" stroke={STATUS_COLOR[s]} strokeWidth="1.5"/>
       </svg>
-      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</span>
+      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
       <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
       <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
     </div>
@@ -139,7 +139,7 @@ function TimerEventNode({ data }: { data: Record<string, unknown> }) {
         <line x1={EVENT_SIZE/2} y1={EVENT_SIZE/2} x2={EVENT_SIZE/2} y2={EVENT_SIZE*0.24} stroke={STATUS_COLOR[s]} strokeWidth="2" strokeLinecap="round"/>
         <line x1={EVENT_SIZE/2} y1={EVENT_SIZE/2} x2={EVENT_SIZE*0.68} y2={EVENT_SIZE/2} stroke={STATUS_COLOR[s]} strokeWidth="2" strokeLinecap="round"/>
       </svg>
-      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</span>
+      <span className="text-[10px] font-medium text-center mt-1 max-w-[80px] leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
       <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
     </div>
   );
@@ -160,11 +160,11 @@ function TaskNode({ data, selected }: { data: Record<string, unknown>; selected?
         <User size={11} style={{color:STATUS_COLOR[s], opacity:0.6}}/>
         <span className="text-[9px] font-bold uppercase tracking-wider" style={{color:STATUS_COLOR[s], opacity:0.7}}>Task</span>
       </div>
-      <p className="text-[12px] font-semibold leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</p>
-      {data.assignee && (
+      <p className="text-[12px] font-semibold leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</p>
+      {!!data.assignee && (
         <div className="flex items-center gap-1 mt-1.5" style={{opacity:0.6}}>
           <User size={10} style={{color:"var(--text-secondary)"}}/>
-          <span className="text-[10px]" style={{color:"var(--text-secondary)"}}>{data.assignee as string}</span>
+          <span className="text-[10px]" style={{color:"var(--text-secondary)"}}>{String(data.assignee)}</span>
         </div>
       )}
       <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
@@ -192,11 +192,11 @@ function AgentTaskNode({ data, selected }: { data: Record<string, unknown>; sele
         <Bot size={11} style={{color:"#BF5AF2"}}/>
         <span className="text-[9px] font-bold uppercase tracking-wider" style={{color:"#BF5AF2",opacity:0.7}}>AI Agent</span>
       </div>
-      <p className="text-[12px] font-semibold leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</p>
-      {data.assignee && (
+      <p className="text-[12px] font-semibold leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</p>
+      {!!data.assignee && (
         <div className="flex items-center gap-1 mt-1.5" style={{opacity:0.6}}>
           <Bot size={10} style={{color:"var(--text-secondary)"}}/>
-          <span className="text-[10px]" style={{color:"var(--text-secondary)"}}>{data.assignee as string}</span>
+          <span className="text-[10px]" style={{color:"var(--text-secondary)"}}>{String(data.assignee)}</span>
         </div>
       )}
       <Handle type="source" position={Position.Right} style={{background:"#BF5AF2",width:8,height:8,border:"2px solid white"}}/>
@@ -214,7 +214,7 @@ function SubProcessNode({ data, selected }: { data: Record<string, unknown>; sel
       background: STATUS_BG[s], position: "relative",
     }}>
       <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
-      <p className="text-[12px] font-semibold leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</p>
+      <p className="text-[12px] font-semibold leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</p>
       <div style={{position:"absolute",bottom:2,left:"50%",transform:"translateX(-50%)"}}>
         <svg width="14" height="14" viewBox="0 0 14 14">
           <rect x="0" y="0" width="14" height="14" rx="2" fill="none" stroke={STATUS_COLOR[s]} strokeWidth="1.5"/>
@@ -244,7 +244,7 @@ function GatewayNodeBase({ data, selected, marker }: { data: Record<string, unkn
           {marker}
         </g>
       </svg>
-      <span className="text-[10px] font-medium text-center mt-1 max-w-[100px] leading-tight" style={{color:"var(--text-primary)"}}>{data.label as string}</span>
+      <span className="text-[10px] font-medium text-center mt-1 max-w-[100px] leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
       <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
       <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
     </div>

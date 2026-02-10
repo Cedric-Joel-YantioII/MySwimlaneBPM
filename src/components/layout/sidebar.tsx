@@ -4,15 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, GitBranch, CheckSquare, FileText, Bot, Users, BarChart3,
+  LayoutDashboard, GitBranch, CheckSquare, Calendar, FileText, Bot, Users, BarChart3,
   Settings, ChevronLeft, ChevronRight, Menu, X, Bell, Plus, Sun, Moon, MessageSquare,
+  BookOpen, BellRing,
 } from "lucide-react";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/workflows", icon: GitBranch, label: "Workflows" },
   { href: "/tasks", icon: CheckSquare, label: "Tasks" },
+  { href: "/scheduling", icon: Calendar, label: "Schedule" },
+  { href: "/reminders", icon: BellRing, label: "Reminders" },
   { href: "/documents", icon: FileText, label: "Documents" },
+  { href: "/documents/library", icon: BookOpen, label: "Library" },
   { href: "/agents", icon: Bot, label: "AI Agents" },
   { href: "/agents/conversations", icon: MessageSquare, label: "Conversations" },
   { href: "/people", icon: Users, label: "People" },
@@ -47,6 +51,8 @@ export function Sidebar() {
     if (href === "/") return pathname === "/";
     if (href === "/agents") return pathname === "/agents" || (pathname.startsWith("/agents/") && !pathname.startsWith("/agents/conversations"));
     if (href === "/agents/conversations") return pathname.startsWith("/agents/conversations");
+    if (href === "/documents") return pathname === "/documents" || (pathname.startsWith("/documents/") && !pathname.startsWith("/documents/library"));
+    if (href === "/documents/library") return pathname.startsWith("/documents/library");
     return pathname.startsWith(href);
   };
 
