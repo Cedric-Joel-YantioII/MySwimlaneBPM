@@ -102,7 +102,7 @@ export default function WorkflowsPage() {
               <List size={18} />
             </button>
           </div>
-          <GlassButton variant="primary">
+          <GlassButton variant="primary" onClick={() => router.push("/workflows/new")}>
             <Plus size={16} /> New Workflow
           </GlassButton>
         </div>

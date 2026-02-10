@@ -18,7 +18,7 @@ export interface Project {
 
 export interface WorkflowNode {
   id: string;
-  type: "start" | "end" | "task" | "gateway" | "agent-task";
+  type: string;
   label: string;
   lane: string;
   phase: string;
