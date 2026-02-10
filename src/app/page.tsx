@@ -1,103 +1,335 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { motion } from "framer-motion";
+import {
+  FolderOpen,
+  ClipboardCheck,
+  ListTodo,
+  Bot,
+  FileText,
+  CheckCircle2,
+  XCircle,
+  MessageSquare,
+  Play,
+  AlertCircle,
+  Clock,
+  Users,
+  ChevronRight,
+} from "lucide-react";
+import { GlassCard } from "@/components/ui/glass-card";
+import { GlassBadge } from "@/components/ui/glass-badge";
+import { GlassButton } from "@/components/ui/glass-button";
+import { GlassProgress } from "@/components/ui/glass-progress";
+import {
+  mockStats,
+  mockTasks,
+  mockDocuments,
+  mockActivities,
+  mockProjects,
+} from "@/lib/mock-data";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.4 },
+  }),
+};
+
+const priorityVariant = {
+  low: "gray",
+  medium: "blue",
+  high: "orange",
+  critical: "red",
+} as const;
+
+const statusVariant = {
+  "todo": "gray",
+  "in-progress": "blue",
+  "review": "purple",
+  "done": "green",
+  "blocked": "red",
+} as const;
+
+function relativeTime(ts: string) {
+  const diff = Date.now() - new Date(ts).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+const activityIcons: Record<string, React.ReactNode> = {
+  task_completed: <CheckCircle2 size={16} style={{ color: "var(--accent-secondary)" }} />,
+  document_submitted: <FileText size={16} style={{ color: "var(--accent-primary)" }} />,
+  document_approved: <CheckCircle2 size={16} style={{ color: "var(--accent-secondary)" }} />,
+  document_rejected: <XCircle size={16} style={{ color: "var(--accent-danger)" }} />,
+  agent_output: <Bot size={16} style={{ color: "var(--accent-purple)" }} />,
+  workflow_started: <Play size={16} style={{ color: "var(--accent-primary)" }} />,
+  comment: <MessageSquare size={16} style={{ color: "var(--accent-warning)" }} />,
+};
+
+const kpis = [
+  { label: "Active Projects", value: mockStats.activeProjects, icon: FolderOpen, color: "var(--accent-primary)" },
+  { label: "Pending Reviews", value: mockStats.pendingReviews, icon: ClipboardCheck, color: "var(--accent-warning)" },
+  { label: "Active Tasks", value: mockStats.activeTasks, icon: ListTodo, color: "var(--accent-secondary)" },
+  { label: "Active Agents", value: mockStats.activeAgents, icon: Bot, color: "var(--accent-purple)" },
+];
+
+export default function DashboardPage() {
+  const myTasks = mockTasks.filter((t) => t.assignee === "You");
+  const pendingDocs = mockDocuments.filter(
+    (d) => d.status === "submitted" || d.status === "under-review"
+  );
+  const activeProjects = mockProjects.filter(
+    (p) => p.status === "active" || p.status === "planning" || p.status === "review"
+  );
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+      {/* Header */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <h1
+          className="text-2xl md:text-3xl font-bold"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Dashboard
+        </h1>
+        <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+          Welcome back. Here's what needs your attention.
+        </p>
+      </motion.div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi, i) => (
+          <motion.div
+            key={kpi.label}
+            custom={i}
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <GlassCard>
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: `${kpi.color}15` }}
+                >
+                  <kpi.icon size={20} style={{ color: kpi.color }} />
+                </div>
+                <div>
+                  <p
+                    className="text-2xl font-bold"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {kpi.value}
+                  </p>
+                  <p
+                    className="text-xs"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {kpi.label}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* My Tasks */}
+        <motion.div custom={4} initial="hidden" animate="visible" variants={fadeUp}>
+          <GlassCard>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
+                My Tasks
+              </h2>
+              <GlassBadge variant="blue">{myTasks.length}</GlassBadge>
+            </div>
+            <div className="space-y-3">
+              {myTasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="flex items-center justify-between p-3 rounded-xl"
+                  style={{ background: "var(--surface-sunken)" }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="text-sm font-medium truncate"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {task.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <GlassBadge variant={priorityVariant[task.priority]} dot>
+                        {task.priority}
+                      </GlassBadge>
+                      <span
+                        className="text-xs flex items-center gap-1"
+                        style={{ color: "var(--text-tertiary)" }}
+                      >
+                        <Clock size={12} /> {task.dueDate}
+                      </span>
+                    </div>
+                  </div>
+                  <GlassBadge variant={statusVariant[task.status]}>{task.status}</GlassBadge>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        {/* Pending Reviews */}
+        <motion.div custom={5} initial="hidden" animate="visible" variants={fadeUp}>
+          <GlassCard>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
+                Pending Reviews
+              </h2>
+              <GlassBadge variant="orange">{pendingDocs.length}</GlassBadge>
+            </div>
+            <div className="space-y-3">
+              {pendingDocs.map((doc) => (
+                <div
+                  key={doc.id}
+                  className="p-3 rounded-xl"
+                  style={{ background: "var(--surface-sunken)" }}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <FileText size={14} style={{ color: "var(--accent-primary)" }} />
+                        <p
+                          className="text-sm font-medium truncate"
+                          style={{ color: "var(--text-primary)" }}
+                        >
+                          {doc.name}
+                        </p>
+                      </div>
+                      <p
+                        className="text-xs mt-1"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        Submitted by {doc.submittedBy} • v{doc.version}
+                      </p>
+                    </div>
+                    <GlassBadge
+                      variant={doc.status === "under-review" ? "purple" : "orange"}
+                    >
+                      {doc.status}
+                    </GlassBadge>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <GlassButton size="sm" variant="primary">
+                      <CheckCircle2 size={14} /> Approve
+                    </GlassButton>
+                    <GlassButton size="sm" variant="danger">
+                      <XCircle size={14} /> Reject
+                    </GlassButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        {/* Recent Activity */}
+        <motion.div custom={6} initial="hidden" animate="visible" variants={fadeUp}>
+          <GlassCard>
+            <h2
+              className="font-semibold text-lg mb-4"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Recent Activity
+            </h2>
+            <div className="space-y-3">
+              {mockActivities.map((act) => (
+                <div key={act.id} className="flex items-start gap-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ background: "var(--surface-sunken)" }}
+                  >
+                    {activityIcons[act.type]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {act.message}
+                    </p>
+                    <p
+                      className="text-xs mt-0.5"
+                      style={{ color: "var(--text-tertiary)" }}
+                    >
+                      {act.actor} • {relativeTime(act.timestamp)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        {/* Active Projects */}
+        <motion.div custom={7} initial="hidden" animate="visible" variants={fadeUp}>
+          <GlassCard>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
+                Active Projects
+              </h2>
+              <GlassButton size="sm" variant="ghost">
+                View All <ChevronRight size={14} />
+              </GlassButton>
+            </div>
+            <div className="space-y-3">
+              {activeProjects.map((proj) => (
+                <div
+                  key={proj.id}
+                  className="p-3 rounded-xl"
+                  style={{ background: "var(--surface-sunken)" }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p
+                      className="text-sm font-medium truncate"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {proj.name}
+                    </p>
+                    <GlassBadge
+                      variant={
+                        proj.status === "active"
+                          ? "green"
+                          : proj.status === "review"
+                          ? "purple"
+                          : "gray"
+                      }
+                      dot
+                    >
+                      {proj.phase}
+                    </GlassBadge>
+                  </div>
+                  <GlassProgress value={proj.progress} />
+                  <div
+                    className="flex items-center justify-between mt-2 text-xs"
+                    style={{ color: "var(--text-tertiary)" }}
+                  >
+                    <span>{proj.progress}% complete</span>
+                    <span className="flex items-center gap-1">
+                      <Users size={12} /> {proj.teamSize}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
+      </div>
     </div>
   );
 }
