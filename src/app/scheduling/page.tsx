@@ -143,17 +143,11 @@ export default function SchedulingPage() {
     return r;
   }, []);
 
-  // Generate header columns
+  // Generate header columns (top row: months/quarters)
   const headerCols = useMemo(() => {
     const cols: { label: string; left: number; width: number }[] = [];
-    if (viewMode === "week") {
-      let d = new Date(rangeStart);
-      while (d <= rangeEnd) {
-        const offset = diffDays(rangeStart, d);
-        cols.push({ label: formatDate(d), left: offset * dayWidth, width: 7 * dayWidth });
-        d = addDays(d, 7);
-      }
-    } else if (viewMode === "month") {
+    if (viewMode === "week" || viewMode === "month") {
+      // Top row always shows months
       let d = new Date(rangeStart);
       while (d <= rangeEnd) {
         const offset = diffDays(rangeStart, d);
@@ -162,7 +156,6 @@ export default function SchedulingPage() {
         d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
       }
     } else {
-      // quarter
       const quarters = [
         { label: "Q1 2026", start: "2026-01-01", end: "2026-03-31" },
         { label: "Q2 2026", start: "2026-04-01", end: "2026-06-30" },
@@ -177,6 +170,52 @@ export default function SchedulingPage() {
     }
     return cols;
   }, [viewMode, dayWidth, rangeStart, rangeEnd]);
+
+  // Generate sub-header columns (bottom row: days or weeks)
+  const subHeaderCols = useMemo(() => {
+    const cols: { label: string; left: number; width: number; isWeekend?: boolean }[] = [];
+    if (viewMode === "week") {
+      // Show each day
+      for (let i = 0; i <= totalDays; i++) {
+        const d = addDays(rangeStart, i);
+        const dayOfWeek = d.getDay();
+        const dayNum = d.getDate();
+        const dayLetter = ["S", "M", "T", "W", "T", "F", "S"][dayOfWeek];
+        cols.push({
+          label: `${dayLetter}\n${dayNum}`,
+          left: i * dayWidth,
+          width: dayWidth,
+          isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+        });
+      }
+    } else if (viewMode === "month") {
+      // Show day numbers, marking week starts
+      for (let i = 0; i <= totalDays; i++) {
+        const d = addDays(rangeStart, i);
+        const dayNum = d.getDate();
+        const dayOfWeek = d.getDay();
+        // Only show label on 1st and every Monday, or every 7th day to avoid clutter
+        const showLabel = dayNum === 1 || dayOfWeek === 1;
+        cols.push({
+          label: showLabel ? String(dayNum) : "",
+          left: i * dayWidth,
+          width: dayWidth,
+          isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+        });
+      }
+    } else {
+      // Quarter view: show months as sub-header
+      let d = new Date(rangeStart);
+      while (d <= rangeEnd) {
+        const offset = diffDays(rangeStart, d);
+        const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        const monthName = d.toLocaleDateString("en-US", { month: "short" });
+        cols.push({ label: monthName, left: offset * dayWidth, width: daysInMonth * dayWidth });
+        d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      }
+    }
+    return cols;
+  }, [viewMode, dayWidth, rangeStart, rangeEnd, totalDays]);
 
   // Scroll to today on mount
   useEffect(() => {
@@ -207,7 +246,9 @@ export default function SchedulingPage() {
   };
 
   const ROW_H = 40;
-  const HEADER_H = 44;
+  const HEADER_TOP = 28;
+  const HEADER_SUB = viewMode === "quarter" ? 24 : 22;
+  const HEADER_H = HEADER_TOP + HEADER_SUB;
 
   // Find task position for dependency arrows
   const taskRowIndex = useMemo(() => {
@@ -359,14 +400,40 @@ export default function SchedulingPage() {
               }}
             >
               <div className="relative" style={{ width: totalWidth, height: HEADER_H }}>
+                {/* Top row: months or quarters */}
                 {headerCols.map((col, i) => (
                   <div
-                    key={i}
-                    className="absolute top-0 h-full flex items-center justify-center text-xs font-semibold text-[var(--text-secondary)]"
+                    key={`top-${i}`}
+                    className="absolute flex items-center justify-center text-[11px] font-semibold text-[var(--text-secondary)]"
                     style={{
                       left: col.left,
                       width: col.width,
+                      top: 0,
+                      height: HEADER_TOP,
                       borderRight: "1px solid var(--glass-border)",
+                      borderBottom: "1px solid var(--glass-border)",
+                    }}
+                  >
+                    {col.label}
+                  </div>
+                ))}
+                {/* Bottom row: days or weeks */}
+                {subHeaderCols.map((col, i) => (
+                  <div
+                    key={`sub-${i}`}
+                    className="absolute flex items-center justify-center leading-tight"
+                    style={{
+                      left: col.left,
+                      width: col.width,
+                      top: HEADER_TOP,
+                      height: HEADER_SUB,
+                      borderRight: viewMode === "week" || (viewMode === "month" && col.label) ? "1px solid var(--glass-border)" : "none",
+                      fontSize: viewMode === "week" ? 8 : 9,
+                      fontWeight: 500,
+                      color: col.isWeekend ? "var(--text-tertiary)" : "var(--text-secondary)",
+                      backgroundColor: col.isWeekend ? "rgba(0,0,0,0.03)" : "transparent",
+                      whiteSpace: "pre-line",
+                      textAlign: "center",
                     }}
                   >
                     {col.label}
@@ -383,6 +450,19 @@ export default function SchedulingPage() {
               style={{ maxHeight: rows.length * ROW_H + 20 }}
             >
               <div className="relative" style={{ width: totalWidth, height: rows.length * ROW_H }}>
+                {/* Weekend shading (week view) */}
+                {viewMode === "week" && subHeaderCols.filter(c => c.isWeekend).map((col, i) => (
+                  <div
+                    key={`wkend-${i}`}
+                    className="absolute top-0 bottom-0 pointer-events-none"
+                    style={{
+                      left: col.left,
+                      width: col.width,
+                      backgroundColor: "rgba(0,0,0,0.04)",
+                    }}
+                  />
+                ))}
+
                 {/* Column grid lines - dashed at each boundary */}
                 {headerCols.map((col, i) => (
                   <div
