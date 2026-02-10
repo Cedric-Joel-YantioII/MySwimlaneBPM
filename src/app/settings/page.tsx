@@ -11,12 +11,24 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
   return (
     <button
       onClick={onChange}
-      className="relative w-11 h-6 rounded-full transition-colors duration-200"
-      style={{ background: checked ? "var(--accent-primary)" : "var(--surface-sunken)", border: "1px solid var(--glass-border)" }}
+      className="relative flex-shrink-0 transition-colors duration-300 ease-in-out rounded-full"
+      style={{
+        width: 48,
+        height: 28,
+        background: checked ? "#34C759" : "#E5E5EA",
+        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
+      }}
     >
       <span
-        className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200"
-        style={{ transform: checked ? "translateX(20px)" : "translateX(2px)" }}
+        className="absolute rounded-full bg-white transition-transform duration-300 ease-in-out"
+        style={{
+          width: 24,
+          height: 24,
+          top: 2,
+          left: 2,
+          transform: checked ? "translateX(20px)" : "translateX(0)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.2), 0 0 0 0.5px rgba(0,0,0,0.04)",
+        }}
       />
     </button>
   );
