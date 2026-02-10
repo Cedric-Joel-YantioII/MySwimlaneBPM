@@ -289,6 +289,192 @@ function EventBasedGatewayNode(props: { data: Record<string, unknown>; selected?
 }
 
 // ═══════════════════════════════════════════════════════
+// FLOWCHART NODE COMPONENTS
+// ═══════════════════════════════════════════════════════
+
+const FC_H = 60;
+
+function FcTerminatorNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  const r = FC_H / 2;
+  return (
+    <div className="flex flex-col items-center">
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <svg width={NODE_W} height={FC_H} viewBox={`0 0 ${NODE_W} ${FC_H}`}>
+        <rect x="1" y="1" width={NODE_W-2} height={FC_H-2} rx={r} ry={r}
+          fill={STATUS_BG[s]} stroke={selected ? "var(--accent-primary)" : STATUS_COLOR[s]} strokeWidth="2"/>
+      </svg>
+      <div style={{position:"absolute",top:0,left:0,width:NODE_W,height:FC_H,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+        <span className="text-[11px] font-semibold text-center px-2 leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+        {!!data.assignee && <span className="text-[9px] mt-0.5" style={{color:"var(--text-tertiary)"}}>{String(data.assignee)}</span>}
+      </div>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+function FcProcessNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  return (
+    <div style={{width:NODE_W,height:FC_H,position:"relative"}}>
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <div style={{
+        width:"100%",height:"100%",
+        border:`2px solid ${selected ? "var(--accent-primary)" : STATUS_COLOR[s]}`,
+        background:STATUS_BG[s],
+        display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",
+        boxShadow: selected ? "0 0 0 2px var(--accent-primary)" : undefined,
+      }}>
+        <span className="text-[11px] font-semibold text-center px-2 leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+        {!!data.assignee && <span className="text-[9px] mt-0.5" style={{color:"var(--text-tertiary)"}}>{String(data.assignee)}</span>}
+      </div>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+function FcOptionalProcessNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  return (
+    <div style={{width:NODE_W,height:FC_H,position:"relative"}}>
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <svg width={NODE_W} height={FC_H} viewBox={`0 0 ${NODE_W} ${FC_H}`} style={{position:"absolute",top:0,left:0}}>
+        <rect x="2" y="2" width={NODE_W-4} height={FC_H-4}
+          fill={STATUS_BG[s]} stroke={selected ? "var(--accent-primary)" : STATUS_COLOR[s]} strokeWidth="2" strokeDasharray="6 3"/>
+      </svg>
+      <div style={{position:"absolute",top:0,left:0,width:NODE_W,height:FC_H,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+        <span className="text-[11px] font-semibold text-center px-2 leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+        {!!data.assignee && <span className="text-[9px] mt-0.5" style={{color:"var(--text-tertiary)"}}>{String(data.assignee)}</span>}
+      </div>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+function FcDecisionNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  const sz = GATEWAY_SIZE;
+  return (
+    <div className="flex flex-col items-center">
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <svg width={sz+8} height={sz+8} viewBox={`0 0 ${sz+8} ${sz+8}`}>
+        <g transform={`translate(${(sz+8)/2},${(sz+8)/2})`}>
+          <rect x={-sz/2+4} y={-sz/2+4} width={sz-8} height={sz-8} rx={3}
+            transform="rotate(45)"
+            fill={STATUS_BG[s]}
+            stroke={selected ? "var(--accent-primary)" : STATUS_COLOR[s]}
+            strokeWidth={selected ? "3" : "2.5"}/>
+        </g>
+      </svg>
+      <span className="text-[10px] font-medium text-center mt-1 max-w-[100px] leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+function FcDocumentNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  const w = NODE_W, h = FC_H;
+  // wavy bottom: straight top, sides, then cubic bezier wave at bottom
+  const path = `M 2,2 L ${w-2},2 L ${w-2},${h-14} C ${w*0.75},${h+2} ${w*0.25},${h-22} 2,${h-10} Z`;
+  return (
+    <div className="flex flex-col items-center" style={{position:"relative",width:w,height:h}}>
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{position:"absolute",top:0,left:0}}>
+        <path d={path} fill={STATUS_BG[s]} stroke={selected ? "var(--accent-primary)" : STATUS_COLOR[s]} strokeWidth="2"/>
+      </svg>
+      <div style={{position:"absolute",top:0,left:0,width:w,height:h-10,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+        <span className="text-[11px] font-semibold text-center px-2 leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+        {!!data.assignee && <span className="text-[9px] mt-0.5" style={{color:"var(--text-tertiary)"}}>{String(data.assignee)}</span>}
+      </div>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+function FcOptionalDocumentNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  const w = NODE_W, h = FC_H;
+  const path = `M 2,2 L ${w-2},2 L ${w-2},${h-14} C ${w*0.75},${h+2} ${w*0.25},${h-22} 2,${h-10} Z`;
+  return (
+    <div className="flex flex-col items-center" style={{position:"relative",width:w,height:h}}>
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{position:"absolute",top:0,left:0}}>
+        <path d={path} fill={STATUS_BG[s]} stroke={selected ? "var(--accent-primary)" : STATUS_COLOR[s]} strokeWidth="2" strokeDasharray="6 3"/>
+      </svg>
+      <div style={{position:"absolute",top:0,left:0,width:w,height:h-10,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+        <span className="text-[11px] font-semibold text-center px-2 leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+        {!!data.assignee && <span className="text-[9px] mt-0.5" style={{color:"var(--text-tertiary)"}}>{String(data.assignee)}</span>}
+      </div>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+function FcMultiDocumentNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  const w = NODE_W, h = FC_H;
+  const off = 4;
+  const docPath = (dx: number, dy: number) => {
+    const x1 = 2+dx, x2 = w-2+dx-off*2, y1 = 2+dy, yb = h-14+dy-off*2;
+    return `M ${x1},${y1} L ${x2},${y1} L ${x2},${yb} C ${(x1+x2)*0.75},${yb+16} ${(x1+x2)*0.25},${yb-8} ${x1},${yb+4} Z`;
+  };
+  return (
+    <div className="flex flex-col items-center" style={{position:"relative",width:w+off*2,height:h+off*2}}>
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <svg width={w+off*2} height={h+off*2} viewBox={`0 0 ${w+off*2} ${h+off*2}`} style={{position:"absolute",top:0,left:0}}>
+        {/* Back docs */}
+        <path d={docPath(off*2,0)} fill={STATUS_BG[s]} stroke={STATUS_COLOR[s]} strokeWidth="1.5" opacity="0.4"/>
+        <path d={docPath(off,off)} fill={STATUS_BG[s]} stroke={STATUS_COLOR[s]} strokeWidth="1.5" opacity="0.6"/>
+        {/* Front doc */}
+        <path d={docPath(0,off*2)} fill={STATUS_BG[s]} stroke={selected ? "var(--accent-primary)" : STATUS_COLOR[s]} strokeWidth="2"/>
+      </svg>
+      <div style={{position:"absolute",top:off*2,left:0,width:w,height:h-10,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+        <span className="text-[11px] font-semibold text-center px-2 leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+        {!!data.assignee && <span className="text-[9px] mt-0.5" style={{color:"var(--text-tertiary)"}}>{String(data.assignee)}</span>}
+      </div>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+function FcOffpageNode({ data, selected }: { data: Record<string, unknown>; selected?: boolean }) {
+  const s = (data.status as string) || "pending";
+  const w = NODE_W, h = FC_H;
+  // Pentagon: rect with right side as arrow point
+  const path = `M 2,2 L ${w-30},2 L ${w-2},${h/2} L ${w-30},${h-2} L 2,${h-2} Z`;
+  return (
+    <div className="flex flex-col items-center" style={{position:"relative",width:w,height:h}}>
+      <Handle type="target" position={Position.Left} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="target" position={Position.Top} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{position:"absolute",top:0,left:0}}>
+        <path d={path} fill={STATUS_BG[s]} stroke={selected ? "var(--accent-primary)" : STATUS_COLOR[s]} strokeWidth="2"/>
+      </svg>
+      <div style={{position:"absolute",top:0,left:0,width:w-20,height:h,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+        <span className="text-[11px] font-semibold text-center px-2 leading-tight" style={{color:"var(--text-primary)"}}>{String(data.label)}</span>
+        {!!data.assignee && <span className="text-[9px] mt-0.5" style={{color:"var(--text-tertiary)"}}>{String(data.assignee)}</span>}
+      </div>
+      <Handle type="source" position={Position.Right} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+      <Handle type="source" position={Position.Bottom} style={{background:STATUS_COLOR[s],width:8,height:8,border:"2px solid white"}}/>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════
 // EDGE COMPONENTS
 // ═══════════════════════════════════════════════════════
 
@@ -327,6 +513,14 @@ const nodeTypes: NodeTypes = {
   "gateway-parallel": ParallelGatewayNode,
   "gateway-inclusive": InclusiveGatewayNode,
   "gateway-event": EventBasedGatewayNode,
+  "fc-terminator": FcTerminatorNode,
+  "fc-process": FcProcessNode,
+  "fc-optional-process": FcOptionalProcessNode,
+  "fc-decision": FcDecisionNode,
+  "fc-document": FcDocumentNode,
+  "fc-optional-document": FcOptionalDocumentNode,
+  "fc-multi-document": FcMultiDocumentNode,
+  "fc-offpage": FcOffpageNode,
   "swimlane-grid": SwimlaneGridNode,
 };
 
@@ -354,6 +548,15 @@ const paletteItems: PaletteItem[] = [
   { type:"gateway-parallel", label:"Parallel (AND)", group:"Gateways", icon:<svg width="20" height="20"><rect x="10" y="2" width="11" height="11" rx="1.5" transform="rotate(45,10,10)" fill="rgba(48,209,88,0.2)" stroke="#30D158" strokeWidth="1.5"/><line x1="10" y1="6" x2="10" y2="14" stroke="#30D158" strokeWidth="1.5"/><line x1="6" y1="10" x2="14" y2="10" stroke="#30D158" strokeWidth="1.5"/></svg> },
   { type:"gateway-inclusive", label:"Inclusive (OR)", group:"Gateways", icon:<svg width="20" height="20"><rect x="10" y="2" width="11" height="11" rx="1.5" transform="rotate(45,10,10)" fill="rgba(10,132,255,0.2)" stroke="#0A84FF" strokeWidth="1.5"/><circle cx="10" cy="10" r="4" fill="none" stroke="#0A84FF" strokeWidth="1.5"/></svg> },
   { type:"gateway-event", label:"Event-Based", group:"Gateways", icon:<svg width="20" height="20"><rect x="10" y="2" width="11" height="11" rx="1.5" transform="rotate(45,10,10)" fill="rgba(142,142,147,0.2)" stroke="#8E8E93" strokeWidth="1.5"/><circle cx="10" cy="10" r="4" fill="none" stroke="#8E8E93" strokeWidth="1"/></svg> },
+  // Flowchart shapes
+  { type:"fc-terminator", label:"Start / End", group:"Flowchart", icon:<svg width="24" height="14"><rect x="1" y="1" width="22" height="12" rx="6" ry="6" fill="rgba(10,132,255,0.15)" stroke="#0A84FF" strokeWidth="1.5"/></svg> },
+  { type:"fc-process", label:"Process", group:"Flowchart", icon:<svg width="24" height="14"><rect x="1" y="1" width="22" height="12" fill="rgba(10,132,255,0.15)" stroke="#0A84FF" strokeWidth="1.5"/></svg> },
+  { type:"fc-optional-process", label:"Optional Process", group:"Flowchart", icon:<svg width="24" height="14"><rect x="1" y="1" width="22" height="12" fill="rgba(142,142,147,0.1)" stroke="#8E8E93" strokeWidth="1.5" strokeDasharray="3 2"/></svg> },
+  { type:"fc-decision", label:"Decision", group:"Flowchart", icon:<svg width="20" height="20"><rect x="10" y="2" width="11" height="11" rx="1.5" transform="rotate(45,10,10)" fill="rgba(255,159,10,0.2)" stroke="#FF9F0A" strokeWidth="1.5"/></svg> },
+  { type:"fc-document", label:"Document", group:"Flowchart", icon:<svg width="24" height="16"><path d="M 1,1 L 23,1 L 23,11 C 18,16 6,6 1,13 Z" fill="rgba(48,209,88,0.15)" stroke="#30D158" strokeWidth="1.5"/></svg> },
+  { type:"fc-optional-document", label:"Optional Doc", group:"Flowchart", icon:<svg width="24" height="16"><path d="M 1,1 L 23,1 L 23,11 C 18,16 6,6 1,13 Z" fill="rgba(142,142,147,0.1)" stroke="#8E8E93" strokeWidth="1.5" strokeDasharray="3 2"/></svg> },
+  { type:"fc-multi-document", label:"Multi-Document", group:"Flowchart", icon:<svg width="24" height="18"><path d="M 5,1 L 23,1 L 23,11 C 18,15 10,7 5,12 Z" fill="rgba(48,209,88,0.1)" stroke="#30D158" strokeWidth="1" opacity="0.5"/><path d="M 3,3 L 21,3 L 21,13 C 16,17 8,9 3,14 Z" fill="rgba(48,209,88,0.15)" stroke="#30D158" strokeWidth="1.5"/></svg> },
+  { type:"fc-offpage", label:"Off-page Ref", group:"Flowchart", icon:<svg width="24" height="14"><path d="M 1,1 L 17,1 L 23,7 L 17,13 L 1,13 Z" fill="rgba(191,90,242,0.15)" stroke="#BF5AF2" strokeWidth="1.5"/></svg> },
 ];
 
 // ═══════════════════════════════════════════════════════

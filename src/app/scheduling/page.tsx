@@ -293,10 +293,17 @@ export default function SchedulingPage() {
         <div className="flex">
           {/* Left panel - task list */}
           <div className="hidden md:block flex-shrink-0" style={{ width: 250 }}>
-            {/* Left header */}
+            {/* Left header - sticky style */}
             <div
-              className="border-b border-[var(--glass-border)] px-3 flex items-center text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide"
-              style={{ height: HEADER_H }}
+              className="border-b-2 border-[var(--glass-border)] px-3 flex items-center text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide"
+              style={{
+                height: HEADER_H,
+                position: "sticky",
+                top: 0,
+                zIndex: 10,
+                backgroundColor: "var(--surface-raised, var(--surface-sunken))",
+                backdropFilter: "blur(8px)",
+              }}
             >
               Tasks
             </div>
@@ -305,10 +312,16 @@ export default function SchedulingPage() {
               {rows.map((row, i) => (
                 <div
                   key={i}
-                  className={`flex items-center px-3 border-b border-[var(--glass-border)]/50 ${
-                    row.type === "project" ? "bg-[var(--surface-sunken)]" : ""
-                  }`}
-                  style={{ height: ROW_H }}
+                  className="flex items-center px-3"
+                  style={{
+                    height: ROW_H,
+                    borderBottom: "1px solid var(--glass-border)",
+                    backgroundColor: row.type === "project"
+                      ? "var(--surface-sunken)"
+                      : i % 2 === 0
+                        ? "rgba(0,0,0,0.02)"
+                        : "transparent",
+                  }}
                 >
                   {row.type === "project" ? (
                     <span className="text-xs font-semibold text-[var(--text-primary)] truncate flex items-center gap-2">
@@ -331,18 +344,30 @@ export default function SchedulingPage() {
 
           {/* Right panel - timeline */}
           <div className="flex-1 min-w-0 border-l border-[var(--glass-border)]">
-            {/* Timeline header */}
+            {/* Timeline header - sticky spreadsheet style */}
             <div
               ref={headerRef}
-              className="overflow-hidden border-b border-[var(--glass-border)]"
-              style={{ height: HEADER_H }}
+              className="overflow-hidden"
+              style={{
+                height: HEADER_H,
+                position: "sticky",
+                top: 0,
+                zIndex: 10,
+                borderBottom: "2px solid var(--glass-border)",
+                backgroundColor: "var(--surface-raised, var(--surface-sunken))",
+                backdropFilter: "blur(8px)",
+              }}
             >
               <div className="relative" style={{ width: totalWidth, height: HEADER_H }}>
                 {headerCols.map((col, i) => (
                   <div
                     key={i}
-                    className="absolute top-0 h-full flex items-center justify-center text-xs font-medium text-[var(--text-secondary)] border-r border-[var(--glass-border)]/30"
-                    style={{ left: col.left, width: col.width }}
+                    className="absolute top-0 h-full flex items-center justify-center text-xs font-semibold text-[var(--text-secondary)]"
+                    style={{
+                      left: col.left,
+                      width: col.width,
+                      borderRight: "1px solid var(--glass-border)",
+                    }}
                   >
                     {col.label}
                   </div>
@@ -358,23 +383,40 @@ export default function SchedulingPage() {
               style={{ maxHeight: rows.length * ROW_H + 20 }}
             >
               <div className="relative" style={{ width: totalWidth, height: rows.length * ROW_H }}>
-                {/* Grid lines for columns */}
+                {/* Column grid lines - dashed at each boundary */}
                 {headerCols.map((col, i) => (
                   <div
                     key={`grid-${i}`}
-                    className="absolute top-0 bottom-0 border-r border-[var(--glass-border)]/20"
-                    style={{ left: col.left + col.width }}
+                    className="absolute top-0 bottom-0 pointer-events-none"
+                    style={{
+                      left: col.left + col.width,
+                      width: 0,
+                      borderLeft: "1px dashed var(--glass-border)",
+                      opacity: 0.6,
+                    }}
                   />
                 ))}
+
+                {/* Today column highlight */}
+                {todayOffset >= 0 && todayOffset <= totalDays && (
+                  <div
+                    className="absolute top-0 bottom-0 z-[5] pointer-events-none"
+                    style={{
+                      left: todayOffset * dayWidth,
+                      width: dayWidth,
+                      backgroundColor: "rgba(220, 38, 38, 0.03)",
+                    }}
+                  />
+                )}
 
                 {/* Today line */}
                 {todayOffset >= 0 && todayOffset <= totalDays && (
                   <div
                     className="absolute top-0 bottom-0 z-20 pointer-events-none"
                     style={{
-                      left: todayOffset * dayWidth,
+                      left: todayOffset * dayWidth + dayWidth / 2,
                       width: 2,
-                      borderLeft: "2px dashed #DC2626",
+                      backgroundColor: "#DC2626",
                     }}
                   >
                     <div className="absolute -top-0 -left-[18px] bg-[#DC2626] text-white text-[9px] px-1.5 py-0.5 rounded-b font-medium">
@@ -425,14 +467,20 @@ export default function SchedulingPage() {
                   })}
                 </svg>
 
-                {/* Task bars & row backgrounds */}
+                {/* Row backgrounds + task bars */}
                 {rows.map((row, i) => {
                   if (row.type === "project") {
                     return (
                       <div
                         key={i}
-                        className="absolute left-0 right-0 bg-[var(--surface-sunken)]/50 border-b border-[var(--glass-border)]/30"
-                        style={{ top: i * ROW_H, height: ROW_H, width: totalWidth }}
+                        className="absolute left-0 right-0"
+                        style={{
+                          top: i * ROW_H,
+                          height: ROW_H,
+                          width: totalWidth,
+                          backgroundColor: "var(--surface-sunken)",
+                          borderBottom: "1px solid var(--glass-border)",
+                        }}
                       >
                         {/* Mobile: project label */}
                         <div className="md:hidden flex items-center h-full px-3">
@@ -454,25 +502,41 @@ export default function SchedulingPage() {
                   return (
                     <div
                       key={i}
-                      className="absolute left-0 right-0 border-b border-[var(--glass-border)]/20"
-                      style={{ top: i * ROW_H, height: ROW_H, width: totalWidth }}
+                      className="absolute left-0 right-0"
+                      style={{
+                        top: i * ROW_H,
+                        height: ROW_H,
+                        width: totalWidth,
+                        borderBottom: "1px solid var(--glass-border)",
+                        backgroundColor: i % 2 === 0 ? "rgba(0,0,0,0.02)" : "transparent",
+                      }}
                     >
                       <div
-                        className="absolute top-[8px] rounded-md z-10 cursor-pointer transition-opacity hover:opacity-80 group"
+                        className="absolute top-[8px] z-10 cursor-pointer transition-all hover:brightness-110 group"
                         style={{
                           left: barLeft,
                           width: barWidth,
                           height: ROW_H - 16,
+                          borderRadius: 4,
                           backgroundColor: STATUS_COLORS[task.status],
                           opacity: task.status === "pending" ? 0.5 : 0.85,
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.1)",
+                          backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.05) 100%)",
                         }}
                         title={`${task.name}\n${task.assignee}\n${task.start} → ${task.end}\nStatus: ${task.status}`}
                       >
-                        {barWidth > 60 && (
-                          <span className="text-[10px] text-white font-medium px-2 truncate block leading-[24px] md:hidden">
-                            {task.name}
-                          </span>
-                        )}
+                        {/* Task name ON the bar */}
+                        <span
+                          className="text-[10px] text-white font-medium px-2 truncate block leading-[24px]"
+                          style={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            textShadow: "0 1px 1px rgba(0,0,0,0.3)",
+                          }}
+                        >
+                          {barWidth > 30 ? task.name : ""}
+                        </span>
                         {/* Tooltip on hover */}
                         <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 pointer-events-none">
                           <div className="glass rounded-lg px-2.5 py-1.5 text-[10px] text-[var(--text-primary)] whitespace-nowrap shadow-lg">
