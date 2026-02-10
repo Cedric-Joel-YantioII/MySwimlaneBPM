@@ -82,7 +82,7 @@ export default function WorkflowDetailPage() {
               </GlassBadge>
             </div>
             <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-              {project.description}
+              Workflow overview with progress tracking across lanes and phases.
             </p>
           </div>
           <GlassButton

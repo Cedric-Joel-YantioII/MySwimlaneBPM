@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText,
@@ -12,6 +12,7 @@ import {
   List,
   Filter,
   ArrowUpDown,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -50,6 +51,17 @@ export default function DocumentsPage() {
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "name">("date");
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const names = Array.from(files).map((f) => f.name);
+      setUploadedFiles((prev) => [...names, ...prev]);
+    }
+    e.target.value = "";
+  };
 
   const filtered = useMemo(() => {
     let docs = [...mockDocuments];
@@ -69,9 +81,13 @@ export default function DocumentsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>Document Hub</h1>
-            <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{filtered.length} documents</p>
+            <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>All project documents in one place. Upload, review, and track versions.</p>
           </div>
           <div className="flex items-center gap-2">
+            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} />
+            <GlassButton variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
+              <Upload size={16} /> Upload
+            </GlassButton>
             <Link href="/documents/review">
               <GlassButton variant="primary" size="sm">
                 Review Queue
@@ -81,6 +97,13 @@ export default function DocumentsPage() {
               </GlassButton>
             </Link>
           </div>
+          {uploadedFiles.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {uploadedFiles.map((name, i) => (
+                <GlassBadge key={i} variant="green" dot>{name}</GlassBadge>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Toolbar */}

@@ -53,14 +53,19 @@ export default function WorkflowsPage() {
         animate={{ opacity: 1 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
-        <div className="flex items-center gap-3">
-          <h1
-            className="text-2xl md:text-3xl font-bold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Workflows
-          </h1>
-          <GlassBadge variant="blue">{mockProjects.length}</GlassBadge>
+        <div>
+          <div className="flex items-center gap-3">
+            <h1
+              className="text-2xl md:text-3xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Workflows
+            </h1>
+            <GlassBadge variant="blue">{mockProjects.length}</GlassBadge>
+          </div>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+            Design and manage evaluation processes using BPMN swimlane workflows.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="glass flex rounded-xl overflow-hidden">

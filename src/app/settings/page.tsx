@@ -61,7 +61,7 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
         <h1 className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>Settings</h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Manage your profile and preferences</p>
+        <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Configure your profile, notifications, and integrations.</p>
       </div>
 
       {/* Profile */}

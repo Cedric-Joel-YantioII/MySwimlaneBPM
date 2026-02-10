@@ -38,7 +38,8 @@ export default function AgentsPage() {
     );
   };
 
-  const deleteAgent = (id: string) => {
+  const deleteAgent = (id: string, name: string) => {
+    if (!confirm(`Delete agent "${name}"? This cannot be undone.`)) return;
     setAgents((prev) => prev.filter((a) => a.id !== id));
   };
 
@@ -50,7 +51,7 @@ export default function AgentsPage() {
             AI Agents
           </h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-            {agents.filter((a) => a.status === "active").length} active · {agents.length} total
+            Your AI workforce. Create, manage, and monitor intelligent agents.
           </p>
         </div>
         <Link href="/agents/new">
@@ -134,7 +135,7 @@ export default function AgentsPage() {
                       <GlassButton size="sm" variant="ghost" onClick={() => togglePause(agent.id)}>
                         {agent.status === "paused" ? <Play size={14} /> : <Pause size={14} />}
                       </GlassButton>
-                      <GlassButton size="sm" variant="ghost" onClick={() => deleteAgent(agent.id)}>
+                      <GlassButton size="sm" variant="ghost" onClick={() => deleteAgent(agent.id, agent.name)}>
                         <Trash2 size={14} style={{ color: "var(--accent-danger)" }} />
                       </GlassButton>
                     </div>

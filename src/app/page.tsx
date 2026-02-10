@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FolderOpen,
   ClipboardCheck,
@@ -80,12 +81,22 @@ const kpis = [
 
 export default function DashboardPage() {
   const myTasks = mockTasks.filter((t) => t.assignee === "You");
-  const pendingDocs = mockDocuments.filter(
-    (d) => d.status === "submitted" || d.status === "under-review"
+  const [reviewDocs, setReviewDocs] = useState(
+    mockDocuments.filter((d) => d.status === "submitted" || d.status === "under-review")
   );
+  const [actioned, setActioned] = useState<Record<string, "approved" | "rejected">>({});
   const activeProjects = mockProjects.filter(
     (p) => p.status === "active" || p.status === "planning" || p.status === "review"
   );
+
+  const handleReview = (docId: string, action: "approved" | "rejected") => {
+    setActioned((prev) => ({ ...prev, [docId]: action }));
+    setTimeout(() => {
+      setReviewDocs((prev) => prev.filter((d) => d.id !== docId));
+    }, 600);
+  };
+
+  const pendingDocs = reviewDocs;
 
   return (
     <div className="min-h-screen p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
@@ -98,7 +109,7 @@ export default function DashboardPage() {
           Dashboard
         </h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-          Welcome back. Here's what needs your attention.
+          Your command center. Track projects, review documents, and monitor your team at a glance.
         </p>
       </motion.div>
 
@@ -194,9 +205,12 @@ export default function DashboardPage() {
               <GlassBadge variant="orange">{pendingDocs.length}</GlassBadge>
             </div>
             <div className="space-y-3">
+              <AnimatePresence>
               {pendingDocs.map((doc) => (
-                <div
+                <motion.div
                   key={doc.id}
+                  layout
+                  exit={{ opacity: 0, x: 80, transition: { duration: 0.3 } }}
                   className="p-3 rounded-xl"
                   style={{ background: "var(--surface-sunken)" }}
                 >
@@ -218,22 +232,31 @@ export default function DashboardPage() {
                         Submitted by {doc.submittedBy} • v{doc.version}
                       </p>
                     </div>
-                    <GlassBadge
-                      variant={doc.status === "under-review" ? "purple" : "orange"}
-                    >
-                      {doc.status}
-                    </GlassBadge>
+                    {actioned[doc.id] ? (
+                      <GlassBadge variant={actioned[doc.id] === "approved" ? "green" : "red"} dot>
+                        {actioned[doc.id]}
+                      </GlassBadge>
+                    ) : (
+                      <GlassBadge
+                        variant={doc.status === "under-review" ? "purple" : "orange"}
+                      >
+                        {doc.status}
+                      </GlassBadge>
+                    )}
                   </div>
-                  <div className="flex gap-2 mt-3">
-                    <GlassButton size="sm" variant="primary">
-                      <CheckCircle2 size={14} /> Approve
-                    </GlassButton>
-                    <GlassButton size="sm" variant="danger">
-                      <XCircle size={14} /> Reject
-                    </GlassButton>
-                  </div>
-                </div>
+                  {!actioned[doc.id] && (
+                    <div className="flex gap-2 mt-3">
+                      <GlassButton size="sm" variant="primary" onClick={() => handleReview(doc.id, "approved")}>
+                        <CheckCircle2 size={14} /> Approve
+                      </GlassButton>
+                      <GlassButton size="sm" variant="danger" onClick={() => handleReview(doc.id, "rejected")}>
+                        <XCircle size={14} /> Reject
+                      </GlassButton>
+                    </div>
+                  )}
+                </motion.div>
               ))}
+              </AnimatePresence>
             </div>
           </GlassCard>
         </motion.div>

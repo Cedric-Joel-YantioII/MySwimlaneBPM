@@ -60,6 +60,7 @@ const allLanes = Array.from(new Set(mockTasks.map((t) => t.lane)));
 const allPriorities = ["critical", "high", "medium", "low"];
 
 export default function TaskBoardPage() {
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [filterLane, setFilterLane] = useState("");
   const [filterAssignee, setFilterAssignee] = useState("");
   const [filterPriority, setFilterPriority] = useState("");
@@ -68,8 +69,32 @@ export default function TaskBoardPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
 
+  const addTask = () => {
+    if (!newTitle.trim()) return;
+    const newTask: Task = {
+      id: `task-${Date.now()}`,
+      title: newTitle.trim(),
+      description: "",
+      status: "todo",
+      priority: "medium",
+      assignee: "You",
+      assigneeType: "person",
+      lane: "Task Manager",
+      phase: "Planning",
+      tags: [],
+      dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
+      createdAt: new Date().toISOString(),
+      workflowId: "wf-1",
+      documentsCount: 0,
+      commentsCount: 0,
+    };
+    setTasks((prev) => [newTask, ...prev]);
+    setNewTitle("");
+    setShowAddForm(false);
+  };
+
   const filtered = useMemo(() => {
-    return mockTasks.filter((t) => {
+    return tasks.filter((t) => {
       if (filterLane && t.lane !== filterLane) return false;
       if (filterAssignee && t.assignee !== filterAssignee) return false;
       if (filterPriority && t.priority !== filterPriority) return false;
@@ -92,7 +117,7 @@ export default function TaskBoardPage() {
             Task Board
           </h1>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-            {filtered.length} tasks across {COLUMNS.length} columns
+            Drag tasks across stages. Filter by project, assignee, or priority.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -185,9 +210,10 @@ export default function TaskBoardPage() {
                 style={{ color: "var(--text-primary)" }}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") setShowAddForm(false);
+                  if (e.key === "Enter") addTask();
                 }}
               />
-              <GlassButton variant="primary" size="sm" onClick={() => setShowAddForm(false)}>
+              <GlassButton variant="primary" size="sm" onClick={addTask}>
                 Create
               </GlassButton>
               <GlassButton variant="ghost" size="sm" onClick={() => setShowAddForm(false)}>

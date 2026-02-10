@@ -41,7 +41,7 @@ export default function CreateAgentPage() {
             Create Agent
           </h1>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Configure a new AI agent for your workflows
+            Configure a new AI agent with a specific role and capabilities.
           </p>
         </div>
       </div>

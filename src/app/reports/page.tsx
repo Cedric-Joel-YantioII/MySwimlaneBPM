@@ -88,7 +88,7 @@ export default function ReportsPage() {
       <div>
         <h1 className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>Reports</h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-          Analytics and insights across all projects
+          Visual analytics across projects, tasks, documents, and team performance.
         </p>
       </div>
 

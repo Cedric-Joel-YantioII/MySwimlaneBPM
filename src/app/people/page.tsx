@@ -27,7 +27,7 @@ export default function PeoplePage() {
           People
         </h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-          {mockPeople.length} team members
+          Your team directory. Staff, consultants, and their current workload.
         </p>
       </div>
 

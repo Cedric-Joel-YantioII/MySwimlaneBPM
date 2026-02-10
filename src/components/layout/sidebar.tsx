@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, GitBranch, CheckSquare, FileText, Bot, Users, BarChart3,
-  Settings, ChevronLeft, ChevronRight, Menu, X, Bell, Plus,
+  Settings, ChevronLeft, ChevronRight, Menu, X, Bell, Plus, Sun, Moon, MessageSquare,
 } from "lucide-react";
 
 const navItems = [
@@ -14,14 +14,34 @@ const navItems = [
   { href: "/tasks", icon: CheckSquare, label: "Tasks" },
   { href: "/documents", icon: FileText, label: "Documents" },
   { href: "/agents", icon: Bot, label: "AI Agents" },
+  { href: "/agents/conversations", icon: MessageSquare, label: "Conversations" },
   { href: "/people", icon: Users, label: "People" },
   { href: "/reports", icon: BarChart3, label: "Reports" },
 ];
+
+function useTheme() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const current = document.documentElement.getAttribute("data-theme") as "light" | "dark" | null;
+    if (current) setTheme(current);
+  }, []);
+
+  const toggle = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+  };
+
+  return { theme, toggle };
+}
 
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -77,6 +97,16 @@ export function Sidebar() {
       </nav>
 
       <div className="px-2 pb-4 space-y-1">
+        <button
+          onClick={toggleTheme}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 w-full
+            text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)] hover:text-[var(--text-primary)]
+            ${collapsed ? "justify-center" : ""}
+          `}
+        >
+          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+          {!collapsed && <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>}
+        </button>
         <Link
           href="/settings"
           onClick={() => setMobileOpen(false)}
@@ -120,6 +150,9 @@ export function Sidebar() {
           <span className="font-semibold text-[var(--text-primary)] text-sm">EvalFlow</span>
         </Link>
         <div className="flex items-center gap-1">
+          <button onClick={toggleTheme} className="p-2 text-[var(--text-secondary)]">
+            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
           <button className="p-2 text-[var(--text-secondary)]"><Bell size={18} /></button>
           <Link href="/tasks" className="p-2 text-[var(--accent-primary)]"><Plus size={18} /></Link>
         </div>
@@ -141,9 +174,8 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Spacer */}
+      {/* Desktop spacer */}
       <div className={`hidden lg:block flex-shrink-0 ${collapsed ? "w-16" : "w-60"}`} />
-      <div className="lg:hidden h-14" />
     </>
   );
 }
