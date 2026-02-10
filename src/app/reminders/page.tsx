@@ -208,24 +208,25 @@ export default function RemindersPage() {
   /* ---- render ---- */
 
   return (
-    <div style={{ padding: "24px", maxWidth: 1400, margin: "0 auto" }}>
+    <div style={{ padding: "16px", maxWidth: 1400, margin: "0 auto" }} className="sm:p-6">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20, gap: 12, flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Reminders & Deadlines</h1>
-          <p style={{ fontSize: 14, color: "var(--text-secondary)", margin: "4px 0 0" }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Reminders & Deadlines</h1>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "4px 0 0" }}>
             Track evaluation deadlines across all projects
           </p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           style={{
-            display: "flex", alignItems: "center", gap: 8, padding: "10px 20px",
+            display: "flex", alignItems: "center", gap: 6, padding: "8px 16px",
             background: "var(--accent-primary)", color: "white", border: "none",
-            borderRadius: "var(--radius-md)", cursor: "pointer", fontSize: 14, fontWeight: 600,
+            borderRadius: "var(--radius-md)", cursor: "pointer", fontSize: 13, fontWeight: 600,
+            whiteSpace: "nowrap", flexShrink: 0,
           }}
         >
-          <Plus size={16} /> Add Reminder
+          <Plus size={14} /> Add Reminder
         </button>
       </div>
 
@@ -252,14 +253,16 @@ export default function RemindersPage() {
           {overdueBannerOpen && (
             <div style={{ padding: "0 20px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
               {overdue.map((d) => (
-                <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "rgba(220,38,38,0.05)", borderRadius: "var(--radius-sm)" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--accent-danger)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>{d.initials}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: "var(--text-primary)" }}>{d.task}</div>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{d.project} · {d.assignee} · {Math.abs(daysBetween(d.dueDate, today))} days overdue</div>
+                <div key={d.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, padding: "10px 14px", background: "rgba(220,38,38,0.05)", borderRadius: "var(--radius-sm)" }}>
+                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-danger)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 600, flexShrink: 0 }}>{d.initials}</div>
+                  <div style={{ flex: 1, minWidth: 160 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "var(--text-primary)" }}>{d.task}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>{d.project} · {Math.abs(daysBetween(d.dueDate, today))}d overdue</div>
                   </div>
-                  <button onClick={() => markComplete(d.id)} style={{ padding: "6px 12px", background: "var(--accent-secondary)", color: "white", border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>Complete</button>
-                  <button onClick={() => snooze(d.id, 3)} style={{ padding: "6px 12px", background: "var(--glass-bg)", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: 12, color: "var(--text-secondary)" }}>Snooze 3d</button>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button onClick={() => markComplete(d.id)} style={{ padding: "5px 10px", background: "var(--accent-secondary)", color: "white", border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: 11, fontWeight: 600 }}>Complete</button>
+                    <button onClick={() => snooze(d.id, 3)} style={{ padding: "5px 10px", background: "var(--glass-bg)", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", fontSize: 11, color: "var(--text-secondary)" }}>Snooze 3d</button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -268,7 +271,7 @@ export default function RemindersPage() {
       )}
 
       {/* Main layout */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 24, alignItems: "start" }}>
+      <div style={{ display: "grid", gap: 20, alignItems: "start" }} className="grid-cols-1 lg:grid-cols-[1fr_340px]">
         {/* Left: deadline list */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {selectedDay && (
@@ -294,54 +297,50 @@ export default function RemindersPage() {
                     <div
                       key={d.id}
                       style={{
-                        padding: "16px 20px", borderRadius: "var(--radius-md)",
+                        padding: "12px 14px", borderRadius: "var(--radius-md)",
                         background: isOverdue ? "rgba(220,38,38,0.04)" : isToday ? "rgba(217,119,6,0.04)" : "var(--glass-bg)",
                         border: `1px solid ${isOverdue ? "rgba(220,38,38,0.15)" : "var(--glass-border)"}`,
                         backdropFilter: "blur(var(--glass-blur))",
-                        display: "flex", alignItems: "center", gap: 14,
                       }}
                     >
-                      {/* Avatar */}
-                      <div style={{
-                        width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
-                        background: `${PRIORITY_COLORS[d.priority]}20`,
-                        color: PRIORITY_COLORS[d.priority],
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 13, fontWeight: 700,
-                      }}>{d.initials}</div>
-
-                      {/* Info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: 14, color: "var(--text-primary)", marginBottom: 2 }}>{d.task}</div>
-                        <div style={{ fontSize: 12, color: "var(--text-secondary)", display: "flex", flexWrap: "wrap", gap: "4px 12px", alignItems: "center" }}>
-                          <span>{d.project}</span>
-                          <span>·</span>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><User size={11} />{d.assignee}</span>
-                          <span>·</span>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Calendar size={11} />{fmt(d.dueDate)}</span>
-                          <span style={{ fontWeight: 600, color: isOverdue ? "var(--accent-danger)" : isToday ? "var(--accent-warning)" : "var(--text-tertiary)" }}>{relative(d.dueDate)}</span>
+                      {/* Top row: avatar + task name + priority */}
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 6 }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+                          background: `${PRIORITY_COLORS[d.priority]}20`,
+                          color: PRIORITY_COLORS[d.priority],
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 12, fontWeight: 700,
+                        }}>{d.initials}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, fontSize: 13, color: "var(--text-primary)", lineHeight: 1.3 }}>{d.task}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>{d.project}</div>
                         </div>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 99, flexShrink: 0,
+                          background: `${PRIORITY_COLORS[d.priority]}18`,
+                          color: PRIORITY_COLORS[d.priority],
+                        }}>{d.priority}</span>
                       </div>
 
-                      {/* Priority */}
-                      <span style={{
-                        fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99,
-                        background: `${PRIORITY_COLORS[d.priority]}18`,
-                        color: PRIORITY_COLORS[d.priority],
-                      }}>{d.priority}</span>
+                      {/* Meta row: assignee, date, relative */}
+                      <div style={{ fontSize: 11, color: "var(--text-secondary)", display: "flex", flexWrap: "wrap", gap: "2px 8px", alignItems: "center", marginBottom: 8, paddingLeft: 42 }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><User size={10} />{d.assignee}</span>
+                        <span>·</span>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Calendar size={10} />{fmt(d.dueDate)}</span>
+                        <span style={{ fontWeight: 600, color: isOverdue ? "var(--accent-danger)" : isToday ? "var(--accent-warning)" : "var(--text-tertiary)" }}>{relative(d.dueDate)}</span>
+                      </div>
 
-                      {/* Reminder indicator */}
-                      {d.reminder ? (
-                        <span title={`Reminder: ${fmt(d.reminder.nextDate)}`} style={{ color: "var(--accent-primary)", display: "flex" }}><BellRing size={16} /></span>
-                      ) : (
-                        <span style={{ color: "var(--text-tertiary)", display: "flex" }}><Bell size={16} /></span>
-                      )}
-
-                      {/* Actions */}
-                      <div style={{ display: "flex", gap: 4, position: "relative" }}>
-                        <button onClick={() => markComplete(d.id)} title="Complete" style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--accent-secondary)" }}><CheckCircle size={14} /></button>
-                        <button onClick={() => snooze(d.id, 1)} title="Snooze 1 day" style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text-secondary)" }}><RotateCcw size={14} /></button>
-                        <button onClick={() => setReminderDropdown(reminderDropdown === d.id ? null : d.id)} title="Set Reminder" style={{ width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text-secondary)" }}><Clock size={14} /></button>
+                      {/* Bottom row: reminder + actions */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 42 }}>
+                        {d.reminder ? (
+                          <span title={`Reminder: ${fmt(d.reminder.nextDate)}`} style={{ color: "var(--accent-primary)", display: "flex", marginRight: "auto" }}><BellRing size={14} /></span>
+                        ) : (
+                          <span style={{ color: "var(--text-tertiary)", display: "flex", marginRight: "auto" }}><Bell size={14} /></span>
+                        )}
+                        <button onClick={() => markComplete(d.id)} title="Complete" style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--accent-secondary)" }}><CheckCircle size={13} /></button>
+                        <button onClick={() => snooze(d.id, 1)} title="Snooze 1 day" style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text-secondary)" }}><RotateCcw size={13} /></button>
+                        <button onClick={() => setReminderDropdown(reminderDropdown === d.id ? null : d.id)} title="Set Reminder" style={{ width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "var(--text-secondary)", position: "relative" }}><Clock size={13} /></button>
                         {reminderDropdown === d.id && (
                           <div style={{
                             position: "absolute", top: 36, right: 0, background: "var(--glass-bg)", backdropFilter: "blur(20px)",
@@ -430,7 +429,8 @@ export default function RemindersPage() {
           <div onClick={(e) => e.stopPropagation()} style={{
             background: "var(--glass-bg)", backdropFilter: "blur(24px)",
             border: "1px solid var(--glass-border)", borderRadius: "var(--radius-lg)",
-            padding: 28, width: 440, boxShadow: "var(--glass-shadow)",
+            padding: "20px", width: "min(440px, calc(100vw - 32px))", maxHeight: "85vh", overflowY: "auto",
+            boxShadow: "var(--glass-shadow)",
           }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Add Reminder</h2>
