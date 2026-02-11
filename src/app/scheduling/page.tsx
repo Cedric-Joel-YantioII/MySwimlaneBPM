@@ -120,6 +120,13 @@ export default function SchedulingPage() {
   const timelineRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
 
+  // For Day view: which week are we looking at (Sunday start)
+  const [calWeekStart, setCalWeekStart] = useState<Date>(() => {
+    const now = new Date();
+    const day = now.getDay();
+    return addDays(now, -day); // Go back to Sunday
+  });
+
   // Timeline range: Jan 1 2026 – Jun 30 2026
   const rangeStart = useMemo(() => toDate("2026-01-01"), []);
   const rangeEnd = useMemo(() => toDate("2026-06-30"), []);
@@ -144,20 +151,11 @@ export default function SchedulingPage() {
   }, []);
 
   const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const DAY_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
-  const HOUR_LABELS = ["12a", "1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12p", "1p", "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p"];
-
   // Generate header columns (top row)
   const headerCols = useMemo(() => {
     const cols: { label: string; left: number; width: number }[] = [];
     if (viewMode === "day") {
-      // Top row: each day with name
-      for (let i = 0; i <= totalDays; i++) {
-        const d = addDays(rangeStart, i);
-        const name = DAY_NAMES[d.getDay()];
-        const label = `${name} ${d.getMonth() + 1}/${d.getDate()}`;
-        cols.push({ label, left: i * dayWidth, width: dayWidth });
-      }
+      // Day view uses separate calendar layout
     } else if (viewMode === "week" || viewMode === "month") {
       // Top row: months
       let d = new Date(rangeStart);
@@ -187,43 +185,27 @@ export default function SchedulingPage() {
   const subHeaderCols = useMemo(() => {
     const cols: { label: string; left: number; width: number; isWeekend?: boolean }[] = [];
     if (viewMode === "day") {
-      // Sub-row: hourly markers within each day
-      for (let i = 0; i <= totalDays; i++) {
-        const d = addDays(rangeStart, i);
-        const isWkend = d.getDay() === 0 || d.getDay() === 6;
-        const hourWidth = dayWidth / 8; // show every 3 hours (8 slots per day)
-        for (let h = 0; h < 8; h++) {
-          const hour = h * 3;
-          cols.push({
-            label: HOUR_LABELS[hour],
-            left: i * dayWidth + h * hourWidth,
-            width: hourWidth,
-            isWeekend: isWkend,
-          });
-        }
-      }
+      // Day view uses separate calendar layout, no sub-headers needed
     } else if (viewMode === "week") {
-      // Show each day with day name + date number
       for (let i = 0; i <= totalDays; i++) {
         const d = addDays(rangeStart, i);
         const dayOfWeek = d.getDay();
         const dayNum = d.getDate();
         cols.push({
-          label: `${DAY_LETTERS[dayOfWeek]} ${dayNum}`,
+          label: `${DAY_NAMES[dayOfWeek]} ${dayNum}`,
           left: i * dayWidth,
           width: dayWidth,
           isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
         });
       }
     } else if (viewMode === "month") {
-      // Show day letter + number on Mondays and 1st
       for (let i = 0; i <= totalDays; i++) {
         const d = addDays(rangeStart, i);
         const dayNum = d.getDate();
         const dayOfWeek = d.getDay();
         const showLabel = dayNum === 1 || dayOfWeek === 1;
         cols.push({
-          label: showLabel ? `${DAY_LETTERS[dayOfWeek]} ${dayNum}` : "",
+          label: showLabel ? `${DAY_NAMES[dayOfWeek]} ${dayNum}` : "",
           left: i * dayWidth,
           width: dayWidth,
           isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
@@ -355,8 +337,127 @@ export default function SchedulingPage() {
         </span>
       </div>
 
+      {/* Day View: Weekly Calendar with hours on left, days as columns */}
+      {viewMode === "day" && (() => {
+        const HOURS = Array.from({ length: 24 }, (_, i) => {
+          if (i === 0) return "12 AM";
+          if (i < 12) return `${i} AM`;
+          if (i === 12) return "12 PM";
+          return `${i - 12} PM`;
+        });
+        const weekDays = Array.from({ length: 7 }, (_, i) => addDays(calWeekStart, i));
+        const allTasks = projects.flatMap(p => p.tasks.map(t => ({ ...t, projectColor: p.color })));
+        const todayStr = new Date().toISOString().slice(0, 10);
+
+        return (
+          <div className="glass rounded-xl overflow-hidden">
+            {/* Week navigation */}
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--glass-border)]">
+              <button
+                onClick={() => setCalWeekStart(addDays(calWeekStart, -7))}
+                className="p-1.5 rounded-lg hover:bg-[var(--surface-sunken)] text-[var(--text-secondary)]"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-sm font-medium text-[var(--text-primary)]">
+                {formatDate(calWeekStart)} – {formatDate(addDays(calWeekStart, 6))}
+              </span>
+              <button
+                onClick={() => setCalWeekStart(addDays(calWeekStart, 7))}
+                className="p-1.5 rounded-lg hover:bg-[var(--surface-sunken)] text-[var(--text-secondary)]"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
+            <div className="overflow-auto" style={{ maxHeight: 600 }}>
+              <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
+                <thead>
+                  <tr>
+                    <th
+                      className="sticky top-0 z-10 text-[10px] font-medium text-[var(--text-tertiary)] border-b border-r border-[var(--glass-border)]"
+                      style={{ width: 60, backgroundColor: "var(--surface-raised, var(--surface-sunken))", backdropFilter: "blur(8px)", padding: "8px 4px" }}
+                    />
+                    {weekDays.map((d, i) => {
+                      const isToday = d.toISOString().slice(0, 10) === todayStr;
+                      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                      return (
+                        <th
+                          key={i}
+                          className="sticky top-0 z-10 text-center border-b border-r border-[var(--glass-border)]"
+                          style={{
+                            backgroundColor: isToday ? "rgba(37, 99, 235, 0.08)" : "var(--surface-raised, var(--surface-sunken))",
+                            backdropFilter: "blur(8px)",
+                            padding: "8px 4px",
+                          }}
+                        >
+                          <div className={`text-[10px] font-medium ${isWeekend ? "text-[var(--text-tertiary)]" : "text-[var(--text-secondary)]"}`}>
+                            {DAY_NAMES[d.getDay()]}
+                          </div>
+                          <div className={`text-sm font-semibold ${isToday ? "text-[#2563EB]" : "text-[var(--text-primary)]"}`}>
+                            {d.getDate()}
+                          </div>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {HOURS.map((label, hourIdx) => (
+                    <tr key={hourIdx}>
+                      <td
+                        className="text-[10px] text-[var(--text-tertiary)] text-right pr-2 border-r border-[var(--glass-border)] align-top"
+                        style={{ height: 48, borderBottom: "1px solid var(--glass-border)" }}
+                      >
+                        {label}
+                      </td>
+                      {weekDays.map((d, dayIdx) => {
+                        const dateStr = d.toISOString().slice(0, 10);
+                        const isToday = dateStr === todayStr;
+                        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                        // Show tasks that span this day in the 8-9 AM slot as a marker
+                        const dayTasks = hourIdx === 8 ? allTasks.filter(t => t.start <= dateStr && t.end >= dateStr) : [];
+                        return (
+                          <td
+                            key={dayIdx}
+                            className="border-r border-[var(--glass-border)] align-top relative"
+                            style={{
+                              height: 48,
+                              borderBottom: "1px solid var(--glass-border)",
+                              backgroundColor: isToday
+                                ? "rgba(37, 99, 235, 0.03)"
+                                : isWeekend
+                                  ? "rgba(0,0,0,0.02)"
+                                  : "transparent",
+                            }}
+                          >
+                            {dayTasks.map((t, ti) => (
+                              <div
+                                key={ti}
+                                className="text-[8px] text-white px-1 py-0.5 rounded truncate mb-0.5"
+                                style={{
+                                  backgroundColor: STATUS_COLORS[t.status],
+                                  opacity: t.status === "pending" ? 0.6 : 0.85,
+                                }}
+                                title={`${t.name}\n${t.assignee}`}
+                              >
+                                {t.name}
+                              </div>
+                            ))}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Gantt Chart */}
-      <div className="glass rounded-xl overflow-hidden">
+      {viewMode !== "day" && <div className="glass rounded-xl overflow-hidden">
         <div className="flex">
           {/* Left panel - task list */}
           <div className="hidden md:block flex-shrink-0" style={{ width: 250 }}>
@@ -694,7 +795,7 @@ export default function SchedulingPage() {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
