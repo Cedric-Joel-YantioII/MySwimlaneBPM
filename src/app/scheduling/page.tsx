@@ -550,8 +550,8 @@ export default function SchedulingPage() {
                       width: col.width,
                       top: HEADER_TOP,
                       height: HEADER_SUB,
-                      borderRight: viewMode === "day" || viewMode === "week" || (viewMode === "month" && col.label) ? "1px solid var(--glass-border)" : "none",
-                      fontSize: viewMode === "day" ? 8 : viewMode === "week" ? 9 : 9,
+                      borderRight: viewMode === "week" || (viewMode === "month" && col.label) ? "1px solid var(--glass-border)" : "none",
+                      fontSize: viewMode === "week" ? 9 : 9,
                       fontWeight: 500,
                       color: col.isWeekend ? "var(--text-tertiary)" : "var(--text-secondary)",
                       backgroundColor: col.isWeekend ? "rgba(0,0,0,0.03)" : "transparent",
@@ -574,7 +574,7 @@ export default function SchedulingPage() {
             >
               <div className="relative" style={{ width: totalWidth, height: rows.length * ROW_H }}>
                 {/* Weekend shading (week view) */}
-                {(viewMode === "week" || viewMode === "day") && subHeaderCols.filter(c => c.isWeekend).map((col, i) => (
+                {viewMode === "week" && subHeaderCols.filter(c => c.isWeekend).map((col, i) => (
                   <div
                     key={`wkend-${i}`}
                     className="absolute top-0 bottom-0 pointer-events-none"
