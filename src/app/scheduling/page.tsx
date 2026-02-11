@@ -345,23 +345,28 @@ export default function SchedulingPage() {
           if (i === 12) return "12 PM";
           return `${i - 12} PM`;
         });
+        const DAY_LETTERS_CAL = ["S", "M", "T", "W", "T", "F", "S"];
         const weekDays = Array.from({ length: 7 }, (_, i) => addDays(calWeekStart, i));
         const allTasks = projects.flatMap(p => p.tasks.map(t => ({ ...t, projectColor: p.color })));
         const todayStr = new Date().toISOString().slice(0, 10);
+        const selectedDay = weekDays.find(d => d.toISOString().slice(0, 10) === todayStr) || weekDays[0];
+        const selectedDayStr = selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" });
+        const monthLabel = calWeekStart.toLocaleDateString("en-US", { month: "long" });
+        // Tasks active on selected day
+        const selectedDateStr = selectedDay.toISOString().slice(0, 10);
+        const dayTasks = allTasks.filter(t => t.start <= selectedDateStr && t.end >= selectedDateStr);
 
         return (
           <div className="glass rounded-xl overflow-hidden">
-            {/* Week navigation */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--glass-border)]">
+            {/* Month name + nav (Apple style: month top-left, arrows top-right) */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-1">
               <button
                 onClick={() => setCalWeekStart(addDays(calWeekStart, -7))}
-                className="p-1.5 rounded-lg hover:bg-[var(--surface-sunken)] text-[var(--text-secondary)]"
+                className="flex items-center gap-1 text-[var(--accent-primary)] text-sm font-medium"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={14} />
+                {monthLabel}
               </button>
-              <span className="text-sm font-medium text-[var(--text-primary)]">
-                {formatDate(calWeekStart)} – {formatDate(addDays(calWeekStart, 6))}
-              </span>
               <button
                 onClick={() => setCalWeekStart(addDays(calWeekStart, 7))}
                 className="p-1.5 rounded-lg hover:bg-[var(--surface-sunken)] text-[var(--text-secondary)]"
@@ -370,87 +375,78 @@ export default function SchedulingPage() {
               </button>
             </div>
 
-            <div className="overflow-auto" style={{ maxHeight: 600 }}>
-              <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
-                <thead>
-                  <tr>
-                    <th
-                      className="sticky top-0 z-10 text-[10px] font-medium text-[var(--text-tertiary)] border-b border-r border-[var(--glass-border)]"
-                      style={{ width: 60, backgroundColor: "var(--surface-raised, var(--surface-sunken))", backdropFilter: "blur(8px)", padding: "8px 4px" }}
-                    />
-                    {weekDays.map((d, i) => {
-                      const isToday = d.toISOString().slice(0, 10) === todayStr;
-                      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-                      return (
-                        <th
-                          key={i}
-                          className="sticky top-0 z-10 text-center border-b border-r border-[var(--glass-border)]"
-                          style={{
-                            backgroundColor: isToday ? "rgba(37, 99, 235, 0.08)" : "var(--surface-raised, var(--surface-sunken))",
-                            backdropFilter: "blur(8px)",
-                            padding: "8px 4px",
-                          }}
-                        >
-                          <div className={`text-[10px] font-medium ${isWeekend ? "text-[var(--text-tertiary)]" : "text-[var(--text-secondary)]"}`}>
-                            {DAY_NAMES[d.getDay()]}
-                          </div>
-                          <div className={`text-sm font-semibold ${isToday ? "text-[#2563EB]" : "text-[var(--text-primary)]"}`}>
-                            {d.getDate()}
-                          </div>
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {HOURS.map((label, hourIdx) => (
-                    <tr key={hourIdx}>
-                      <td
-                        className="text-[10px] text-[var(--text-tertiary)] text-right pr-2 border-r border-[var(--glass-border)] align-top"
-                        style={{ height: 48, borderBottom: "1px solid var(--glass-border)" }}
-                      >
-                        {label}
-                      </td>
-                      {weekDays.map((d, dayIdx) => {
-                        const dateStr = d.toISOString().slice(0, 10);
-                        const isToday = dateStr === todayStr;
-                        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-                        // Show tasks that span this day in the 8-9 AM slot as a marker
-                        const dayTasks = hourIdx === 8 ? allTasks.filter(t => t.start <= dateStr && t.end >= dateStr) : [];
-                        return (
-                          <td
-                            key={dayIdx}
-                            className="border-r border-[var(--glass-border)] align-top relative"
-                            style={{
-                              height: 48,
-                              borderBottom: "1px solid var(--glass-border)",
-                              backgroundColor: isToday
-                                ? "rgba(37, 99, 235, 0.03)"
-                                : isWeekend
-                                  ? "rgba(0,0,0,0.02)"
-                                  : "transparent",
-                            }}
-                          >
-                            {dayTasks.map((t, ti) => (
-                              <div
-                                key={ti}
-                                className="text-[8px] text-white px-1 py-0.5 rounded truncate mb-0.5"
-                                style={{
-                                  backgroundColor: STATUS_COLORS[t.status],
-                                  opacity: t.status === "pending" ? 0.6 : 0.85,
-                                }}
-                                title={`${t.name}\n${t.assignee}`}
-                              >
-                                {t.name}
-                              </div>
-                            ))}
-                          </td>
-                        );
-                      })}
-                    </tr>
+            {/* Day letter row (S M T W T F S) */}
+            <div className="grid grid-cols-7 px-4 pb-1">
+              {DAY_LETTERS_CAL.map((letter, i) => (
+                <div key={i} className="text-center text-[10px] font-semibold text-[var(--text-tertiary)]">
+                  {letter}
+                </div>
+              ))}
+            </div>
+
+            {/* Date numbers row with today circled */}
+            <div className="grid grid-cols-7 px-4 pb-3">
+              {weekDays.map((d, i) => {
+                const isToday = d.toISOString().slice(0, 10) === todayStr;
+                return (
+                  <div key={i} className="flex justify-center">
+                    <div
+                      className="w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold"
+                      style={{
+                        backgroundColor: isToday ? "#DC2626" : "transparent",
+                        color: isToday ? "white" : "var(--text-primary)",
+                      }}
+                    >
+                      {d.getDate()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Selected day label */}
+            <div className="px-4 py-2 border-t border-b border-[var(--glass-border)] text-center">
+              <span className="text-sm font-medium text-[var(--text-primary)]">
+                {selectedDayStr}
+              </span>
+            </div>
+
+            {/* All-day events */}
+            {dayTasks.length > 0 && (
+              <div className="px-4 py-2 border-b border-[var(--glass-border)]">
+                <span className="text-[10px] text-[var(--text-tertiary)] mr-2">all-day</span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {dayTasks.map((t, i) => (
+                    <div
+                      key={i}
+                      className="text-[11px] text-white px-2 py-0.5 rounded"
+                      style={{ backgroundColor: STATUS_COLORS[t.status], opacity: t.status === "pending" ? 0.6 : 0.85 }}
+                    >
+                      {t.name}
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
+            )}
+
+            {/* Hourly timeline (hours on left, content area on right) */}
+            <div className="overflow-auto" style={{ maxHeight: 480 }}>
+              {HOURS.map((label, hourIdx) => (
+                <div key={hourIdx} className="flex" style={{ height: 56 }}>
+                  {/* Hour label on the left */}
+                  <div
+                    className="flex-shrink-0 text-right pr-2 text-[10px] text-[var(--text-tertiary)]"
+                    style={{ width: 48, paddingTop: 2 }}
+                  >
+                    {label}
+                  </div>
+                  {/* Hour row */}
+                  <div
+                    className="flex-1 relative"
+                    style={{ borderTop: "1px solid var(--glass-border)" }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         );
